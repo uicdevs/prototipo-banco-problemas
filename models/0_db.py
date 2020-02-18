@@ -5,7 +5,7 @@
 # Auth is for authenticaiton and access control
 # -------------------------------------------------------------------------
 from gluon.contrib.appconfig import AppConfig
-from gluon.tools import Auth
+from gluon.tools import Auth, AuthJWT
 
 T.force('es')
 
@@ -115,6 +115,11 @@ mail.settings.ssl = configuration.get('smtp.ssl') or False
 auth.settings.registration_requires_verification = False
 auth.settings.registration_requires_approval = False
 auth.settings.reset_password_requires_verification = True
+
+# -------------------------------------------------------------------------
+# Create JWT
+# -------------------------------------------------------------------------
+AppJWT = AuthJWT(auth, secret_key=configuration.get('auth.secret_key', 'A very Secret Key!!!'))
 
 # -------------------------------------------------------------------------  
 # read more at http://dev.w3.org/html5/markup/meta.name.html               
