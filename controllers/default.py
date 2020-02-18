@@ -36,8 +36,8 @@ def api():
 
     def GET(*args,**vars):
 
-        # allows only unauthenticated access to problem api endpoints
-        if args[0] != 'problem' and not auth.user:
+        # allows only unauthenticated access to problem and pattern api endpoints
+        if (args[0] not in ['problem', 'patterns']) and not auth.user:
             raise HTTP(403)
 
         patterns = [
