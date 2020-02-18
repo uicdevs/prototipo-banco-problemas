@@ -32,3 +32,6 @@ heartbeat = 1
 
 [google]
 analytics_id =
+
+[auth]
+secret_key = a_very_secret_key!!

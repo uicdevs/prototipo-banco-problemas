@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from plugin_daxs_utils import only_development
 from plugin_daxs_utils import auth as daxs_auth
 
@@ -24,6 +23,52 @@ def populate_db():
     auth.add_membership(admin_group_id, admin_user_id)
 
     return 'ok'
+
+# @post_request
+def login_and_take_token():
+    return AppJWT.jwt_token_manager()
+
+# @auth.requires_login()
+@AppJWT.allows_jwt(required=False)
+@request.restful()
+def api():
+    response.view = 'generic.'+request.extension
+
+    def GET(*args,**vars):
+
+        # allows only unauthenticated access to problem api endpoints
+        if args[0] != 'problem' and not auth.user:
+            raise HTTP(403)
+
+        patterns = [
+            '/problem[problem]',
+            ':auto[problem]',
+
+            '/vote[vote]',
+            ':auto[vote]',
+
+            ':auto[auth_user]'
+        ]
+        parser = db.parse_as_rest(patterns,args,vars)
+        if parser.status == 200:
+            return dict(content=parser.response)
+        else:
+            raise HTTP(parser.status,parser.error)
+
+    def POST(table_name,**vars):
+        if (not auth.user and table_name != 'problem') and not auth.requires_membership('admin'):
+            raise HTTP(403)
+        return db[table_name].validate_and_insert(**vars)
+    def PUT(table_name,record_id,**vars):
+        if not auth.requires_membership('admin'):
+            raise HTTP(403)
+        return db(db[table_name]._id==record_id).update(**vars)
+    def DELETE(table_name,record_id):
+        if not auth.requires_membership('admin'):
+            raise HTTP(403)
+        return db(db[table_name]._id==record_id).delete()
+
+    return dict(GET=GET, POST=POST, PUT=PUT, DELETE=DELETE)
 
 # ---- Action for login/register/etc (required for auth) -----
 def user():
